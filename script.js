@@ -1,86 +1,89 @@
+/* ===============================
+   NO button – runaway logic
+================================ */
 (() => {
   const container = document.querySelector('.options');
   const noBtn = document.querySelector('.no');
+
   if (!container || !noBtn) return;
 
-  const padding = 12; // leave a small gap from edges
+  const padding = 20;
   let cooldown = false;
 
   function placeAt(x, y) {
-    // keep the button centered using translate(-50%,-50%) in CSS
     noBtn.style.left = `${x}px`;
     noBtn.style.top = `${y}px`;
   }
 
   function randomPosition() {
     const rect = container.getBoundingClientRect();
-    const bRect = noBtn.getBoundingClientRect();
-    const minX = rect.left + padding + bRect.width / 2;
-    const maxX = rect.right - padding - bRect.width / 2;
-    const minY = rect.top + padding + bRect.height / 2;
-    const maxY = rect.bottom - padding - bRect.height / 2;
-    const x = Math.floor(Math.random() * (maxX - minX + 1) + minX);
-    const y = Math.floor(Math.random() * (maxY - minY + 1) + minY);
-    // convert to coordinates relative to container for left/top
-    return { x: x - rect.left, y: y - rect.top };
+    const btnRect = noBtn.getBoundingClientRect();
+
+    const minX = padding + btnRect.width / 2;
+    const maxX = rect.width - padding - btnRect.width / 2;
+    const minY = padding + btnRect.height / 2;
+    const maxY = rect.height - padding - btnRect.height / 2;
+
+    return {
+      x: Math.random() * (maxX - minX) + minX,
+      y: Math.random() * (maxY - minY) + minY
+    };
   }
 
-  // initialize position to center
-  const initRect = container.getBoundingClientRect();
-  placeAt(initRect.width / 2, initRect.height / 2);
+  // Initial center position
+  placeAt(container.clientWidth / 2, container.clientHeight / 2);
 
+  // Desktop: mouse move
   container.addEventListener('mousemove', (e) => {
     if (cooldown) return;
-    const rect = container.getBoundingClientRect();
-    const bRect = noBtn.getBoundingClientRect();
-    const mouseX = e.clientX;
-    const mouseY = e.clientY;
-    const btnCenterX = bRect.left + bRect.width / 2;
-    const btnCenterY = bRect.top + bRect.height / 2;
-    const dx = mouseX - btnCenterX;
-    const dy = mouseY - btnCenterY;
-    const dist = Math.hypot(dx, dy);
-    const threshold = 120; // pixels
 
-    if (dist < threshold) {
+    const btnRect = noBtn.getBoundingClientRect();
+    const dx = e.clientX - (btnRect.left + btnRect.width / 2);
+    const dy = e.clientY - (btnRect.top + btnRect.height / 2);
+    const distance = Math.hypot(dx, dy);
+
+    if (distance < 120) {
       cooldown = true;
       const pos = randomPosition();
       placeAt(pos.x, pos.y);
-      // small delay to avoid rapid jumps
-      setTimeout(() => (cooldown = false), 220);
+      setTimeout(() => cooldown = false, 200);
     }
   });
 
-  // keep button inside when window resizes
+  // Mobile: touch start
+  noBtn.addEventListener('touchstart', () => {
+    const pos = randomPosition();
+    placeAt(pos.x, pos.y);
+  });
+
+  // Keep inside container on resize
   window.addEventListener('resize', () => {
-    const rect = container.getBoundingClientRect();
-    placeAt(rect.width / 2, rect.height / 2);
+    placeAt(container.clientWidth / 2, container.clientHeight / 2);
   });
 })();
 
-// --- Yes button: show "Working (Image)" state ---
-(function () {
+/* ===============================
+   YES button – final screen
+================================ */
+(() => {
   const yesBtn = document.querySelector('.yes');
   const main = document.querySelector('main.container');
+
   if (!yesBtn || !main) return;
 
   yesBtn.addEventListener('click', () => {
-    // build working view with inline SVG spinner
-    const working = document.createElement('div');
-    working.className = 'working';
-    working.setAttribute('role', 'status');
-    working.setAttribute('aria-live', 'polite');
-    working.innerHTML = `
-      <div class="working-inner">
-        <svg class="spinner" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="4" stroke-linecap="round" />
-        </svg>
-        <div class="working-text">Working</div>
-      </div>
+    const result = document.createElement('div');
+    result.className = 'result';
+
+    result.innerHTML = `
+      <h1>Yayyyy ❤️</h1>
+      <img src="bike.png" alt="Bike" class="bike-img">
+      <p style="font-size:1.1rem;font-weight:600;color:#374151;">
+        Forever ride together 🏍️💑
+      </p>
     `;
 
-    // replace main content
     main.innerHTML = '';
-    main.appendChild(working);
+    main.appendChild(result);
   });
 })();
