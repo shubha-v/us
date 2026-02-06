@@ -1,0 +1,22 @@
+*{box-sizing:border-box}
+body{font-family:Inter,system-ui,Arial,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#f3f4f6}
+.container{text-align:center;padding:2rem}
+h1{font-size:1.6rem;margin-bottom:1.2rem;color:#111827}
+.options{position:relative;height:140px;width:360px;margin:0 auto;display:flex;align-items:center;justify-content:center}
+button{padding:.7rem 1.2rem;border-radius:8px;border:none;font-weight:700;box-shadow:0 6px 18px rgba(15,23,42,0.08);transition:transform .12s ease}
+.yes{background:#10b981;color:#fff;margin-right:1rem;cursor:pointer}
+.yes:active{transform:scale(.98)}
+.no{background:#ef4444;color:#fff;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);cursor:default;transition:left .18s ease, top .18s ease, transform .18s ease}
+
+/* JavaScript will handle movement; keep the button visually enabled but disabled functionally */
+button:disabled{opacity:1}
+
+/* Working state */
+.working{display:flex;align-items:center;justify-content:center;height:60vh}
+.working-inner{display:flex;flex-direction:column;align-items:center;gap:12px}
+.spinner{width:72px;height:72px}
+.spinner .path{stroke:#2563eb;stroke-dasharray:90;stroke-dashoffset:0;transform-origin:50% 50%;animation:dash 1.2s ease-in-out infinite, spin 1.2s linear infinite}
+.working-text{font-weight:700;color:#0f172a;font-size:1.1rem}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes dash{0%{stroke-dashoffset:90}50%{stroke-dashoffset:30}100%{stroke-dashoffset:90}}
