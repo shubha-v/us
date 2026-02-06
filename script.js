@@ -11,6 +11,7 @@
   let cooldown = false;
 
   function placeAt(x, y) {
+    noBtn.style.position = 'absolute';
     noBtn.style.left = `${x}px`;
     noBtn.style.top = `${y}px`;
   }
@@ -19,10 +20,10 @@
     const rect = container.getBoundingClientRect();
     const btnRect = noBtn.getBoundingClientRect();
 
-    const minX = padding + btnRect.width / 2;
-    const maxX = rect.width - padding - btnRect.width / 2;
-    const minY = padding + btnRect.height / 2;
-    const maxY = rect.height - padding - btnRect.height / 2;
+    const minX = padding;
+    const maxX = rect.width - btnRect.width - padding;
+    const minY = padding;
+    const maxY = rect.height - btnRect.height - padding;
 
     return {
       x: Math.random() * (maxX - minX) + minX,
@@ -30,40 +31,22 @@
     };
   }
 
-  // Initial center position
-  placeAt(container.clientWidth / 2, container.clientHeight / 2);
-
-  // Desktop: mouse move
-  container.addEventListener('mousemove', (e) => {
+  container.addEventListener('mousemove', () => {
     if (cooldown) return;
-
-    const btnRect = noBtn.getBoundingClientRect();
-    const dx = e.clientX - (btnRect.left + btnRect.width / 2);
-    const dy = e.clientY - (btnRect.top + btnRect.height / 2);
-    const distance = Math.hypot(dx, dy);
-
-    if (distance < 120) {
-      cooldown = true;
-      const pos = randomPosition();
-      placeAt(pos.x, pos.y);
-      setTimeout(() => cooldown = false, 200);
-    }
+    cooldown = true;
+    const pos = randomPosition();
+    placeAt(pos.x, pos.y);
+    setTimeout(() => cooldown = false, 250);
   });
 
-  // Mobile: touch start
   noBtn.addEventListener('touchstart', () => {
     const pos = randomPosition();
     placeAt(pos.x, pos.y);
   });
-
-  // Keep inside container on resize
-  window.addEventListener('resize', () => {
-    placeAt(container.clientWidth / 2, container.clientHeight / 2);
-  });
 })();
 
 /* ===============================
-   YES button – final screen
+   YES button – hearts + result
 ================================ */
 (() => {
   const yesBtn = document.querySelector('.yes');
@@ -71,19 +54,43 @@
 
   if (!yesBtn || !main) return;
 
-  yesBtn.addEventListener('click', () => {
-    const result = document.createElement('div');
-    result.className = 'result';
+  function heartExplosion(x, y) {
+    for (let i = 0; i < 24; i++) {
+      const heart = document.createElement('div');
+      heart.className = 'heart';
+      heart.textContent = '💖';
 
-    result.innerHTML = `
-      <h1>Yayyyy ❤️</h1>
-      <img src="bike.png" alt="Bike" class="bike-img">
-      <p style="font-size:1.1rem;font-weight:600;color:#374151;">
-        Forever ride together 🏍️💑
-      </p>
-    `;
+      const angle = Math.random() * 2 * Math.PI;
+      const distance = Math.random() * 120 + 40;
 
-    main.innerHTML = '';
-    main.appendChild(result);
+      heart.style.left = `${x}px`;
+      heart.style.top = `${y}px`;
+      heart.style.setProperty('--x', `${Math.cos(angle) * distance}px`);
+      heart.style.setProperty('--y', `${Math.sin(angle) * distance}px`);
+
+      document.body.appendChild(heart);
+
+      setTimeout(() => heart.remove(), 1200);
+    }
+  }
+
+  yesBtn.addEventListener('click', (e) => {
+    const rect = yesBtn.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+
+    heartExplosion(x, y);
+
+    setTimeout(() => {
+      main.innerHTML = `
+        <div class="result">
+          <h1>Yayyyy ❤️</h1>
+          <img src="bike.png" class="bike-img" alt="Bike">
+          <p style="font-size:1.1rem;font-weight:600;color:#374151;">
+            Forever ride together 🏍️💑
+          </p>
+        </div>
+      `;
+    }, 700);
   });
 })();
